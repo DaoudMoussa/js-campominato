@@ -11,6 +11,8 @@
 do {
     var livelloDifficolta = parseInt(prompt('Inserire il livello di difficoltá (da 1 a 3)'));
 } while (isNaN(livelloDifficolta) || livelloDifficolta < 1 || livelloDifficolta > 3);
+
+// Communico il livello di difficoltà
 console.log('il livello di difficoltá scelto è: ' + livelloDifficolta);
 
 // a seconda del livello scelto determinare gli estremi dei numeri
@@ -20,36 +22,71 @@ var max = determinaMax(livelloDifficolta);
 // generazione di 16 numeri casuali da un min ad un massimo
 var bombNumbers = 16;
 var bombValues = getNDifferentRandomNumbers(bombNumbers, min, max);
-console.log(bombValues);
+console.log('I 16 numeri generati casualmente sono: ' + bombValues);
 
-// lútente inserisce de numeri finche non sceglie un numero contenuto in bomb bombValues
-var quantitaScelte = 0;
-var numeriSceltiPrecedentemente = [];
-var numeroScelto;
-var winning = true;
-do {
-    numeroScelto = parseInt(prompt('Inserire un numero da ' + min + ' a ' + max + ':'));
+// viene dichiarato un array in cui in posizione 0 c'è l'esito della partita e nella
+// posizione 1 il punteggio fatto dal giocatore
+var winningAndPoints = gioco(bombValues, bombNumbers);
 
-    if (!numeriSceltiPrecedentemente.includes(numeroScelto) && !isNaN(numeroScelto) && numeroScelto < max && numeroScelto > min) {
-        for (var i = 0; i < bombValues.length; i++) {
-            if(numeroScelto == bombValues[i]) {
-                winning = false
-            }
-        }
-        console.log('numero scelto: ' + numeroScelto);
+// a seconda dell'esito (winningAndPoints[0]) comunicare un messaggio all'utente
+// comunicandogli anche il suo punteggio (winningAndPoints[1])
+if(winningAndPoints[0]) {
+    console.log('Complimenti hai vinto! hai indovinato ' + winningAndPoints[1] + ' volte!');
+} else {
+    console.log('Hai perso! Il tuo punteggio è: ' + winningAndPoints[1] + '!');
+}
+
+
+
+
+
+
+function gioco(bombValues, bombNumbers) {
+    // l'utente inserisce de numeri finche non sceglie un numero contenuto in bomb bombValues
+    // o finché non sceglie max - 16 numeri diversi
+    var quantitaScelte = 0;
+    var numeriSceltiPrecedentemente = [];
+    var numeroScelto;
+    var winning = true;
+
+    do {
+        //l'utente sceglie un numero
+        numeroScelto = parseInt(prompt('Inserire un numero da ' + min + ' a ' + max + ':'));
+
+        // controlla se il numero sia valido e se il numero inserito sia una delle bombe meno
+        // e ritorna il valore della variabile winning (false se si ha perso e true se si va avanti)
+        winning = controlloNumero(numeroScelto, min, max, numeriSceltiPrecedentemente, bombValues);
+
+        // se winning è ancora true (il numero scelto non é una delle bombe) allora
+        // il contatore aumenta di 1 e aggiunge la scelta ai numeri scelti ai numeri scelti precedentemente
         if(winning) {
             quantitaScelte++;
             console.log('Non hai preso una bomba, puoi continuare! Per adesso sei a: ' + quantitaScelte);
             numeriSceltiPrecedentemente.push(numeroScelto);
         }
-    }
-} while (winning && quantitaScelte < (max - bombNumbers));
+    } while (winning && quantitaScelte < (max - bombNumbers));
 
-if(winning) {
-    console.log('Complimenti hai vinto! hai indovinato ' + quantitaScelte + ' volte!');
-} else {
-    console.log('Hai perso! Il tuo punteggio è: ' + quantitaScelte + '!');
+    // Crea un array con i 2 valori che servono per stampare il messaggio finale
+    var array = [winning, quantitaScelte]
+    return array;
 }
+
+function controlloNumero(numeroScelto, min, max, numeriSceltiPrecedentemente, bombValues) {
+    if (!numeriSceltiPrecedentemente.includes(numeroScelto) && !isNaN(numeroScelto) && numeroScelto < max && numeroScelto > min) {
+        // Stampa numero numero scdlto
+        console.log('numero scelto: ' + numeroScelto);
+
+        // Controlla che il numero scelto non sia una delle bombe scorrendo tutto l'array
+        for (var i = 0; i < bombValues.length; i++) {
+            // se il numero scelto è uguale ad una bomba allora winning va a false
+            if(numeroScelto == bombValues[i]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 
 function determinaMax(numeroDifficolta) {
     if (numeroDifficolta == 1) {
